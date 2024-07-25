@@ -23,6 +23,8 @@ def nmf(matrix):
 
     res = []
 
+    matrix = np.abs(matrix)
+    
     if (matrix<0).any(): 
         return res
 
@@ -61,7 +63,7 @@ def main():
             # print(cur_file_name, matrix)
             # raise ValueError("test")
             result[person.split(".")[0]].append(nmf(matrix))
-        print(result)
+
         output_dir = os.path.join(result_dir, group)
         if not os.path.exists(output_dir): os.makedirs(output_dir)
         with open(os.path.join(output_dir, "results.json"), 'w', encoding='utf-8') as f:
