@@ -19,12 +19,20 @@ result_dir = "results"
 def vaf(V: np.ndarray, Vr: np.ndarray) -> float:
     return 1 - (np.sum((V-Vr)**2)/np.sum(V**2))
 
+def regularization(matrix: np.ndarray):
+    
+    epsilon = 1e-5
+    min_vals = matrix.min(axis=0)  
+    max_vals = matrix.max(axis=0)  
+    normalized_matrix = (matrix - min_vals) / (max_vals - min_vals + epsilon)
+
+    return normalized_matrix
+
+
 def nmf(matrix):
 
     res = []
-
     matrix = np.abs(matrix)
-    
     if (matrix<0).any(): 
         return res
 
@@ -35,11 +43,15 @@ def nmf(matrix):
         H = model.components_
         VR = W @ H
         VAF = vaf(matrix, VR)
+        WR = regularization(W)
+        HR = regularization(H)
 
         wh = {
             i: dict(
                 W=str(W),
+                WR=str(WR),
                 H=str(H),
+                HR=str(HR),
                 VR=str(VR),
                 VAF=VAF
             )
@@ -71,4 +83,4 @@ def main():
 
 if __name__=="__main__":
     main()
-
+    
