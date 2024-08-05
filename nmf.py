@@ -12,6 +12,8 @@ from tqdm import tqdm
 
 from sklearn.decomposition import NMF
 
+from draw import draw_W
+
 root_dir = "data"
 child_dirs = os.listdir(root_dir)
 result_dir = "results"
@@ -28,9 +30,8 @@ def regularization(matrix: np.ndarray):
 
     return normalized_matrix
 
-
-def nmf(matrix):
-
+def nmf(matrix, group, person):
+    matrix = np.transpose(matrix)
     res = []
     matrix = np.abs(matrix)
     if (matrix<0).any(): 
@@ -43,8 +44,10 @@ def nmf(matrix):
         H = model.components_
         VR = W @ H
         VAF = vaf(matrix, VR)
+
         WR = regularization(W)
         HR = regularization(H)
+        ACTIVATION = np.mean(regularization(WR @ HR), axis=0)
 
         wh = {
             i: dict(
@@ -53,10 +56,12 @@ def nmf(matrix):
                 H=str(H),
                 HR=str(HR),
                 VR=str(VR),
-                VAF=VAF
+                VAF=VAF,
+                ACTIVATION=str(ACTIVATION)
             )
         }
-
+        if i == 3 or i == 4:
+            draw_W(WR, group, person)
         res.append(wh)
     return res
 
@@ -74,7 +79,7 @@ def main():
             matrix = df.values
             # print(cur_file_name, matrix)
             # raise ValueError("test")
-            result[person.split(".")[0]].append(nmf(matrix))
+            result[person.split(".")[0]].append(nmf(matrix, group, person))
 
         output_dir = os.path.join(result_dir, group)
         if not os.path.exists(output_dir): os.makedirs(output_dir)
