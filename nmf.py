@@ -12,11 +12,14 @@ from tqdm import tqdm
 
 from sklearn.decomposition import NMF
 
-from draw import draw_W
+from draw import draw_W, draw_W_all
 
 root_dir = "data"
 child_dirs = os.listdir(root_dir)
 result_dir = "results"
+
+w_3 = {}
+h_3 = {}
 
 def vaf(V: np.ndarray, Vr: np.ndarray) -> float:
     return 1 - (np.sum((V-Vr)**2)/np.sum(V**2))
@@ -62,6 +65,18 @@ def nmf(matrix, group, person):
         }
         if i == 3 or i == 4:
             draw_W(WR, group, person)
+
+        if i == 3:
+            if group not in w_3.keys():
+                w_3[group] = W
+            else:
+                w_3[group] += W
+            
+            if group not in h_3.keys():
+                h_3[group] = H.transpose()[:160, :]
+            else:
+                h_3[group] += H.transpose()[:160, :]
+        
         res.append(wh)
     return res
 
@@ -80,6 +95,12 @@ def main():
             # print(cur_file_name, matrix)
             # raise ValueError("test")
             result[person.split(".")[0]].append(nmf(matrix, group, person))
+
+        # Draw W&H all fig
+        for group in w_3.keys():
+            w_all = [w_3[group][:, i]/16 for i in range(w_3[group].shape[1])]
+            h_all = [h_3[group][:, i]/16 for i in range(h_3[group].shape[1])]
+            draw_W_all(w_all, h_all, group)
 
         output_dir = os.path.join(result_dir, group)
         if not os.path.exists(output_dir): os.makedirs(output_dir)
