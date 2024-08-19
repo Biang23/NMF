@@ -44,6 +44,31 @@ def draw_W(w: np.ndarray, group: str, person: str):
     plt.savefig(f"image/{group}/{person.split('.')[0]}_W_{plot_num}.jpg")
     plt.close()
 
+def draw_W_all(w: list[np.ndarray], h: list[np.ndarray], group:str):
+    fig, ax = plt.subplots(nrows=len(w), ncols=2)
+    color_map = ['red', 'blue', 'green']
+    for i, (w_i, h_i) in enumerate(zip(w, h)):
+        w_mean = np.mean(w_i)
+        w_std = np.std(w_i, ddof=1)
+        h_mean = np.mean(h_i)
+        h_std = np.std(h_i, ddof=1)
+        x = [i for i in range(1, 11)]
+        # Draw W
+        ax[i][0].bar(x, w_i, color=color_map[i], label=f'W{i}')
+        ax[i][0].errorbar(x, w_i, yerr=w_std, fmt='.', color='grey', capsize=2, label='std')
+        ax[i][0].plot(x, [w_mean] * 10, color='black')
+
+        # Draw H
+        x1 = [i for i in range(1, 161)]
+        y1, y2 = h_i+h_std, h_i-h_std
+        ax[i][1].plot(x1, h_i, color='red', label=f'H{i}')
+        ax[i][1].plot(x1, y1, color='grey', linestyle='--')
+        ax[i][1].plot(x1, y2, color='grey', linestyle='--')
+        ax[i][1].fill_between(x1, y1, y2, color='grey', alpha=0.5)
+
+    fig.legend()
+    plt.savefig(f"image/{group}/w_all.jpg")
+    plt.close()
 
 if __name__=="__main__":
     output_dir = "image/duizhao_xihu"
